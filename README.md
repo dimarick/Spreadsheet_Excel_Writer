@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/pear/Spreadsheet_Excel_Writer.svg?branch=master)](https://travis-ci.org/pear/Spreadsheet_Excel_Writer)
+[![Build Status](https://travis-ci.org/dimarick/Spreadsheet_Excel_Writer.svg?branch=master)](https://travis-ci.org/pear/Spreadsheet_Excel_Writer)
 
 This package is [Spreadsheet_Excel_Writer](http://pear.php.net/package/Spreadsheet_Excel_Writer) and has been migrated from [svn.php.net](https://svn.php.net/repository/pear/packages/Spreadsheet_Excel_Writer).
 
@@ -10,17 +10,19 @@ To test, run
 
     $ phpunit
 
-To build, simply
+## Migration
 
-    $ pear package
+- This package has no dependencies from any pear classes and uses php5 native exceptions for error handling.
+Be careful, currently many unexpected issues can throw unexpected exceptions instead of silent fail
 
-To install from scratch
+- Used standard psr-0 composer autoloader
 
-    $ pear install package.xml
+- Constants OP_* moved to class Spreadsheet_Excel_Writer_Validator
 
-To upgrade
+- Constants SPREADSHEET_EXCEL_WRITER_* moved to class Spreadsheet_Excel_Writer_Parser
 
-    $ pear upgrade -f package.xml
+- Do not try to run it on php4
+
 
 ## Composer
 

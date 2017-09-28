@@ -22,22 +22,6 @@
 *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-//require_once('PEAR.php');
-
-// Possible operator types
-
-/*
-FIXME: change prefixes
-*/
-define("OP_BETWEEN",    0x00);
-define("OP_NOTBETWEEN", 0x01);
-define("OP_EQUAL",      0x02);
-define("OP_NOTEQUAL",   0x03);
-define("OP_GT",         0x04);
-define("OP_LT",         0x05);
-define("OP_GTE",        0x06);
-define("OP_LTE",        0x07);
-
 /**
 * Baseclass for generating Excel DV records (validations)
 *
@@ -47,26 +31,40 @@ define("OP_LTE",        0x07);
 */
 class Spreadsheet_Excel_Writer_Validator
 {
-   public $_type;
-   public $_style;
-   public $_fixedList;
-   public $_blank;
-   public $_incell;
-   public $_showprompt;
-   public $_showerror;
-   public $_title_prompt;
-   public $_descr_prompt;
-   public $_title_error;
-   public $_descr_error;
-   public $_operator;
-   public $_formula1;
-   public $_formula2;
+    // Possible operator types
+    CONST OP_BETWEEN =    0x00;
+    CONST OP_NOTBETWEEN = 0x01;
+    CONST OP_EQUAL =      0x02;
+    CONST OP_NOTEQUAL =   0x03;
+    CONST OP_GT =         0x04;
+    CONST OP_LT =         0x05;
+    CONST OP_GTE =        0x06;
+    CONST OP_LTE =        0x07;
+
+    public $_type;
+    public $_style;
+    public $_fixedList;
+    public $_blank;
+    public $_incell;
+    public $_showprompt;
+    public $_showerror;
+    public $_title_prompt;
+    public $_descr_prompt;
+    public $_title_error;
+    public $_descr_error;
+    public $_operator;
+    public $_formula1;
+    public $_formula2;
     /**
     * The parser from the workbook. Used to parse validation formulas also
     * @var Spreadsheet_Excel_Writer_Parser
     */
     public $_parser;
 
+    /**
+     * Spreadsheet_Excel_Writer_Validator constructor.
+     * @param $parser
+     */
     public function __construct($parser)
     {
         $this->_parser       = $parser;
@@ -82,74 +80,97 @@ class Spreadsheet_Excel_Writer_Validator
         $this->_title_error  = "\x00";
         $this->_descr_error  = "\x00";
         $this->_operator     = 0x00; // default is equal
-        $this->_formula1    = '';
-        $this->_formula2    = '';
+        $this->_formula1     = '';
+        $this->_formula2     = '';
     }
 
-   public function setPrompt($promptTitle = "\x00", $promptDescription = "\x00", $showPrompt = true)
+    /**
+     * @param string $promptTitle
+     * @param string $promptDescription
+     * @param bool $showPrompt
+     */
+    public function setPrompt($promptTitle = "\x00", $promptDescription = "\x00", $showPrompt = true)
    {
       $this->_showprompt = $showPrompt;
       $this->_title_prompt = $promptTitle;
       $this->_descr_prompt = $promptDescription;
    }
 
-   public function setError($errorTitle = "\x00", $errorDescription = "\x00", $showError = true)
+    /**
+     * @param string $errorTitle
+     * @param string $errorDescription
+     * @param bool $showError
+     */
+    public function setError($errorTitle = "\x00", $errorDescription = "\x00", $showError = true)
    {
       $this->_showerror = $showError;
       $this->_title_error = $errorTitle;
       $this->_descr_error = $errorDescription;
    }
 
-   public function allowBlank()
+    /**
+     *
+     */
+    public function allowBlank()
    {
       $this->_blank = true;
    }
 
-   public function onInvalidStop()
+    /**
+     *
+     */
+    public function onInvalidStop()
    {
       $this->_style = 0x00;
    }
 
+    /**
+     *
+     */
     public function onInvalidWarn()
     {
         $this->_style = 0x01;
     }
 
+    /**
+     *
+     */
     public function onInvalidInfo()
     {
         $this->_style = 0x02;
     }
 
+    /**
+     * @param $formula
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
     public function setFormula1($formula)
     {
         // Parse the formula using the parser in Parser.php
-        $error = $this->_parser->parse($formula);
-        if (PEAR::isError($error)) {
-            return $this->_formula1;
-        }
-
+        $this->_parser->parse($formula);
         $this->_formula1 = $this->_parser->toReversePolish();
-        if (PEAR::isError($this->_formula1)) {
-            return $this->_formula1;
-        }
+
         return true;
     }
 
+    /**
+     * @param $formula
+     * @return bool
+     * @throws \InvalidArgumentException
+     */
     public function setFormula2($formula)
     {
         // Parse the formula using the parser in Parser.php
-        $error = $this->_parser->parse($formula);
-        if (PEAR::isError($error)) {
-            return $this->_formula2;
-        }
-
+        $this->_parser->parse($formula);
         $this->_formula2 = $this->_parser->toReversePolish();
-        if (PEAR::isError($this->_formula2)) {
-            return $this->_formula2;
-        }
+
         return true;
     }
 
+    /**
+     * @return int
+     */
     protected function _getOptions()
     {
         $options = $this->_type;
@@ -169,12 +190,15 @@ class Spreadsheet_Excel_Writer_Validator
         if ($this->_showerror) {
             $options |= 0x80000;
         }
-      $options |= $this->_operator << 20;
+        $options |= $this->_operator << 20;
 
-      return $options;
+        return $options;
    }
 
-   protected function _getData()
+    /**
+     * @return string
+     */
+    protected function _getData()
    {
       $title_prompt_len = strlen($this->_title_prompt);
       $descr_prompt_len = strlen($this->_descr_prompt);
@@ -196,33 +220,3 @@ class Spreadsheet_Excel_Writer_Validator
       return $data;
    }
 }
-
-/*class Spreadsheet_Excel_Writer_Validation_List extends Spreadsheet_Excel_Writer_Validation
-{
-   public function Spreadsheet_Excel_Writer_Validation_list()
-   {
-      parent::Spreadsheet_Excel_Writer_Validation();
-      $this->_type = 0x03;
-   }
-
-   public function setList($source, $incell = true)
-   {
-      $this->_incell = $incell;
-      $this->_fixedList = true;
-
-      $source = implode("\x00", $source);
-      $this->_formula1 = pack("CCC", 0x17, strlen($source), 0x0c) . $source;
-   }
-
-   public function setRow($row, $col1, $col2, $incell = true)
-   {
-      $this->_incell = $incell;
-      //$this->_formula1 = ...;
-   }
-
-   public function setCol($col, $row1, $row2, $incell = true)
-   {
-      $this->_incell = $incell;
-      //$this->_formula1 = ...;
-   }
-}*/

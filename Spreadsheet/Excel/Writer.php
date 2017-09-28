@@ -31,10 +31,6 @@
 *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-if (!class_exists('Spreadsheet_Excel_Writer_Workbook')) {
-    require_once 'Spreadsheet/Excel/Writer/Workbook.php';
-}
-
 /**
 * Class for writing Excel Spreadsheets. This class should change COMPLETELY.
 *
@@ -49,7 +45,6 @@ class Spreadsheet_Excel_Writer extends Spreadsheet_Excel_Writer_Workbook
     * The constructor. It just creates a Workbook
     *
     * @param string $filename The optional filename for the Workbook.
-    * @return Spreadsheet_Excel_Writer_Workbook The Workbook created
     */
     public function __construct($filename = '')
     {
@@ -61,7 +56,6 @@ class Spreadsheet_Excel_Writer extends Spreadsheet_Excel_Writer_Workbook
     * Send HTTP headers for the Excel file.
     *
     * @param string $filename The filename to use for HTTP headers
-    * @access public
     */
     public function send($filename)
     {
@@ -74,19 +68,18 @@ class Spreadsheet_Excel_Writer extends Spreadsheet_Excel_Writer_Workbook
     }
 
     /**
-    * Utility function for writing formulas
-    * Converts a cell's coordinates to the A1 format.
-    *
-    * @access public
-    * @static
-    * @param integer $row Row for the cell to convert (0-indexed).
-    * @param integer $col Column for the cell to convert (0-indexed).
-    * @return string The cell identifier in A1 format
-    */
-    function rowcolToCell($row, $col)
+     * Utility function for writing formulas
+     * Converts a cell's coordinates to the A1 format.
+     *
+     * @param integer $row Row for the cell to convert (0-indexed).
+     * @param integer $col Column for the cell to convert (0-indexed).
+     * @return string The cell identifier in A1 format
+     * @throws \InvalidArgumentException
+     */
+    public static function rowcolToCell($row, $col)
     {
         if ($col > 255) { //maximum column value exceeded
-            return new PEAR_Error("Maximum column value exceeded: $col");
+            throw new \InvalidArgumentException("Maximum column value exceeded: $col");
         }
 
         $int = (int)($col / 26);
